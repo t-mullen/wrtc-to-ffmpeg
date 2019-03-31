@@ -46,9 +46,11 @@ Transforms a `MediaStreamTrack` into an input object.
 
 ### `output = await w2f.output({ kind, width, height, sampleRate })`
 
-Creates an ouput object.
+Creates an output object with the specified properties.
 
 `output.track` is a `MediaStreamTrack`.
+
+`output.url` is a Unix domain socket path that FFMPEG can use as output.
  
 `output.options` is an object with the minimum FFMPEG options.
 
