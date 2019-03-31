@@ -2,7 +2,7 @@
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-Pipe MediaStreamTracks to/from [wrtc](https://github.com/node-webrtc/node-webrtc) to [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg). Early development, plenty of issues. Currently only for Unix and Linux.
+Pipe MediaStreamTracks between [wrtc](https://github.com/node-webrtc/node-webrtc) and [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg). Early development, plenty of issues. Currently only for Unix and Linux.
 
 Allows you to record WebRTC streams, stream media files over WebRTC connections, or route WebRTC streams to RTSP/RTMP/etc. 
 
