@@ -1,0 +1,26 @@
+{
+  "name": "wrtc-to-ffmpeg",
+  "version": "0.0.0",
+  "description": "Pipe WebRTC MediaStreams to/from fluent-ffmpeg.",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "standard --fix src/** && tape test/*.js"
+  },
+  "author": "Thomas Mullen",
+  "license": "MIT",
+  "devDependencies": {
+    "fluent-ffmpeg": "^2.1.2",
+    "getusermedia": "^2.0.1",
+    "simple-peer": "^9.3.0",
+    "standard": "^8.6.0",
+    "tape": "^4.6.3",
+    "wrtc": "^0.3.6"
+  },
+  "dependencies": {
+    "fluent-ffmpeg-multistream": "^1.0.0",
+    "stream-chunker": "^1.2.8"
+  }
+}
