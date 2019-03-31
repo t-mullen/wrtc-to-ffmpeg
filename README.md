@@ -25,7 +25,7 @@ You can also pipe FFMPEG output to `MediaStreamTracks`.
 const videoOutput = await w2f.output({ kind: 'video', width: 480, height: 360 })
 const audioOutput = await w2f.output({ kind: 'audio', sampleRate: 48000 })
 ffmpeg()
-  .input('myVideo.mp4')  
+  .input('./myVideo.mp4')  
   .output(videoOutput.url)  					
   .outputOptions(videoOutput.options) 
   .output(audioOutput.url)  					
