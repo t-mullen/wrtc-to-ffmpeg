@@ -14,9 +14,9 @@ const w2f = require('wrtc-to-ffmpeg')(wrtc)
 const input = await w2f.input(track) // audio or video MediaStreamTrack
 
 ffmpeg()
-	.input(input.url) 							// add our input
-	.inputOptions(input.options)    // specify the input options
-	.output('myVideo.mp4')  				// save the stream to an mp4
+  .input(input.url) 		  // add our input
+  .inputOptions(input.options)    // specify the input options
+  .output('myVideo.mp4')  	  // save the stream to an mp4
 ```
 
 You can also pipe FFMPEG output to `MediaStreamTracks`.
@@ -25,13 +25,13 @@ You can also pipe FFMPEG output to `MediaStreamTracks`.
 const videoOutput = await w2f.output({ kind: 'video', width: 480, height: 360 })
 const audioOutput = await w2f.output({ kind: 'audio', sampleRate: 48000 })
 ffmpeg()
-	.input('myVideo.mp4')  
-	.output(videoOutput.url)  					
-	.outputOptions(videoOutput.options) 
-	.output(audioOutput.url)  					
-	.outputOptions(audioOutput.options) 
+  .input('myVideo.mp4')  
+  .output(videoOutput.url)  					
+  .outputOptions(videoOutput.options) 
+  .output(audioOutput.url)  					
+  .outputOptions(audioOutput.options) 
 
-videoOutput.track // do what you want with the new MediaStreamTrack
+videoOutput.track // do what you want with the new MediaStreamTracks
 audioOutput.track
 ```
 
