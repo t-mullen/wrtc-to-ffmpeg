@@ -16,7 +16,7 @@ w2f.input = function input (track) {
 
     sink.onframe = ({ frame }) => {
       rs.push(Buffer.from(frame.data))
-      input.options = inputOptions(track.kind, frame.width, frame.height)
+      input.options = getOptions(track.kind, frame.width, frame.height)
       input.width = frame.width
       input.height = frame.height
       rs.emit('options')
@@ -26,7 +26,7 @@ w2f.input = function input (track) {
     sink.ondata = (event) => {
       rs.push(Buffer.from(event.samples.buffer))
     }
-    input.options = inputOptions(track.kind)
+    input.options = getOptions(track.kind)
   }
 
   return new Promise((resolve) => {
@@ -38,23 +38,6 @@ w2f.input = function input (track) {
       })
     }
   })
-}
-
-function inputOptions (kind, width, height) {
-  if (kind === 'video') {
-    return [
-      '-f rawvideo',
-      '-c:v rawvideo',
-      '-s ' + width + 'x' + height, // TODO
-      '-pix_fmt yuv420p'
-    ]
-  } else if (kind === 'audio') {
-    return [
-      '-f s16le',
-      '-ar 48k',
-      '-ac 1'
-    ]
-  }
 }
 
 w2f.output = function output ({ kind, width, height, sampleRate }) {
@@ -86,7 +69,7 @@ w2f.output = function output ({ kind, width, height, sampleRate }) {
 
   const output = StreamOutput(ws)
   output.track = source.createTrack()
-  output.options = outputOptions(kind, width, height)
+  output.options = getOptions(kind, width, height)
   output.kind = kind
   output.width = width
   output.height = height
@@ -96,13 +79,14 @@ w2f.output = function output ({ kind, width, height, sampleRate }) {
   })
 }
 
-function outputOptions (kind, width, height) {
+function getOptions (kind, width, height) {
   if (kind === 'video') {
     return [
       '-f rawvideo',
       '-c:v rawvideo',
       '-s ' + width + 'x' + height, // TODO
-      '-pix_fmt yuv420p'
+      '-pix_fmt yuv420p',
+      '-r 30'
     ]
   } else if (kind === 'audio') {
     return [
