@@ -2,7 +2,7 @@
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-## THIS IS A WIP
+## THIS IS A WORK-IN-PROGRESS
 
 Pipe MediaStreamTracks between [wrtc](https://github.com/node-webrtc/node-webrtc) and [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg). Early development, plenty of issues. Currently only for Unix and Linux.
 
