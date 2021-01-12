@@ -22,5 +22,8 @@
   "dependencies": {
     "fluent-ffmpeg-multistream": "^1.0.0",
     "stream-chunker": "^1.2.8"
+  },
+  "peerDependencies": {
+    "wrtc": "^0.4.7"
   }
 }

@@ -1,6 +1,6 @@
 const ffmpeg = require('fluent-ffmpeg')
 const wrtc = require('wrtc')
-const w2f = require('../src')(wrtc)
+const w2f = require('../src')
 const Peer = require('simple-peer')
 
 var ws = require('ws')

@@ -1,18 +1,22 @@
 
-const { Readable } = require('stream')
 const { Buffer } = require('buffer')
-const chunker = require('stream-chunker')
-const { StreamInput, StreamOutput } = require('fluent-ffmpeg-multistream')
-const w2f = {}
+const { Readable } = require('stream')
 
-w2f.input = function input (track) {
+const { StreamInput, StreamOutput } = require('fluent-ffmpeg-multistream')
+const chunker = require('stream-chunker')
+const {
+  RTCAudioSink, RTCAudioSource, RTCVideoSink, RTCVideoSource
+} = require('wrtc').nonstandard
+
+
+exports.input = function input (track) {
   const rs = new Readable()
   rs._read = () => {}
   const input = StreamInput(rs)
   input.kind = track.kind
 
   if (track.kind === 'video') {
-    const sink = new w2f.wrtc.nonstandard.RTCVideoSink(track)
+    const sink = new RTCVideoSink(track)
 
     sink.onframe = ({ frame }) => {
       rs.push(Buffer.from(frame.data))
@@ -22,7 +26,7 @@ w2f.input = function input (track) {
       rs.emit('options')
     }
   } else if (track.kind === 'audio') {
-    const sink = new w2f.wrtc.nonstandard.RTCAudioSink(track)
+    const sink = new RTCAudioSink(track)
     sink.ondata = (event) => {
       rs.push(Buffer.from(event.samples.buffer))
     }
@@ -40,13 +44,13 @@ w2f.input = function input (track) {
   })
 }
 
-w2f.output = function output ({ kind, width, height, sampleRate }) {
+exports.output = function output ({ kind, width, height, sampleRate }) {
   var ws = null
   var source = null
 
   if (kind === 'video') {
     ws = chunker(width * height * 1.5)
-    source = new w2f.wrtc.nonstandard.RTCVideoSource()
+    source = new RTCVideoSource()
 
     ws.on('data', (chunk) => {
       source.onFrame({
@@ -57,7 +61,7 @@ w2f.output = function output ({ kind, width, height, sampleRate }) {
     })
   } else if (kind === 'audio') {
     ws = chunker(2 * sampleRate / 100)
-    source = new w2f.wrtc.nonstandard.RTCAudioSource()
+    source = new RTCAudioSource()
 
     ws.on('data', (chunk) => {
       source.onData({
@@ -95,9 +99,4 @@ function getOptions (kind, width, height) {
       '-ac 1'
     ]
   }
-}
-
-module.exports = (wrtc) => {
-  w2f.wrtc = wrtc
-  return w2f
 }
