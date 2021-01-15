@@ -9,7 +9,7 @@ const {
 } = require('wrtc').nonstandard
 
 
-exports.input = function input (track) {
+exports.input = function input (track, fps) {
   const rs = new Readable()
   rs._read = () => {}
   const input = StreamInput(rs)
@@ -18,11 +18,13 @@ exports.input = function input (track) {
   if (track.kind === 'video') {
     const sink = new RTCVideoSink(track)
 
-    sink.onframe = ({ frame }) => {
-      rs.push(Buffer.from(frame.data))
-      input.options = getOptions(track.kind, frame.width, frame.height)
-      input.width = frame.width
-      input.height = frame.height
+    sink.onframe = ({ frame: {data, height, width} }) => {
+      rs.push(Buffer.from(data))
+
+      input.options = getOptions(track.kind, width, height, fps)
+      input.height  = height
+      input.width   = width
+
       rs.emit('options')
     }
   } else if (track.kind === 'audio') {
@@ -44,7 +46,7 @@ exports.input = function input (track) {
   })
 }
 
-exports.output = function output ({ kind, width, height, sampleRate }) {
+exports.output = function output ({ kind, width, height, sampleRate }, fps) {
   var ws = null
   var source = null
 
@@ -73,7 +75,7 @@ exports.output = function output ({ kind, width, height, sampleRate }) {
 
   const output = StreamOutput(ws)
   output.track = source.createTrack()
-  output.options = getOptions(kind, width, height)
+  output.options = getOptions(kind, width, height, fps)
   output.kind = kind
   output.width = width
   output.height = height
@@ -83,14 +85,14 @@ exports.output = function output ({ kind, width, height, sampleRate }) {
   })
 }
 
-function getOptions (kind, width, height) {
+function getOptions (kind, width, height, fps=30) {
   if (kind === 'video') {
     return [
       '-f rawvideo',
       '-c:v rawvideo',
       '-s ' + width + 'x' + height, // TODO
       '-pix_fmt yuv420p',
-      '-r 30'
+      `-r ${fps}`
     ]
   } else if (kind === 'audio') {
     return [
