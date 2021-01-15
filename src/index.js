@@ -10,8 +10,10 @@ const {
 
 
 exports.input = function input (track, fps) {
-  const rs = new Readable()
-  rs._read = () => {}
+  const rs = new Readable({
+    _read(){}
+  })
+
   const input = StreamInput(rs)
   input.kind = track.kind
 
@@ -29,21 +31,15 @@ exports.input = function input (track, fps) {
     }
   } else if (track.kind === 'audio') {
     const sink = new RTCAudioSink(track)
-    sink.ondata = (event) => {
-      rs.push(Buffer.from(event.samples.buffer))
-    }
+
+    sink.ondata = (event) => rs.push(Buffer.from(event.samples.buffer))
+
     input.options = getOptions(track.kind)
   }
 
-  return new Promise((resolve) => {
-    if (input.options) {
-      resolve(input)
-    } else {
-      rs.once('options', () => {
-        resolve(input)
-      })
-    }
-  })
+  if (input.options) return Promise.resolve(input)
+
+  return new Promise(resolve => rs.once('options', () => resolve(input)))
 }
 
 exports.output = function output ({ kind, width, height, sampleRate }, fps) {
@@ -66,8 +62,10 @@ exports.output = function output ({ kind, width, height, sampleRate }, fps) {
     source = new RTCAudioSource()
 
     ws.on('data', (chunk) => {
+      chunk = chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.length)
+
       source.onData({
-        samples: new Int16Array(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.length)),
+        samples: new Int16Array(chunk),
         sampleRate
       })
     })
@@ -80,9 +78,7 @@ exports.output = function output ({ kind, width, height, sampleRate }, fps) {
   output.width = width
   output.height = height
 
-  return new Promise((resolve) => {
-    resolve(output)
-  })
+  return Promise.resolve(output)
 }
 
 function getOptions (kind, width, height, fps=30) {
