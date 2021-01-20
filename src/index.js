@@ -11,7 +11,7 @@ const {
 
 exports.input = function input (track, fps) {
   const rs = new Readable({
-    _read(){}
+    read(){}
   })
 
   const input = StreamInput(rs)
