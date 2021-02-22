@@ -1,52 +1,54 @@
 
-const { Readable } = require('stream')
 const { Buffer } = require('buffer')
-const chunker = require('stream-chunker')
-const { StreamInput, StreamOutput } = require('fluent-ffmpeg-multistream')
-const w2f = {}
+const { Readable } = require('stream')
 
-w2f.input = function input (track) {
-  const rs = new Readable()
-  rs._read = () => {}
+const { StreamInput, StreamOutput } = require('fluent-ffmpeg-multistream')
+const chunker = require('stream-chunker')
+const {
+  RTCAudioSink, RTCAudioSource, RTCVideoSink, RTCVideoSource
+} = require('wrtc').nonstandard
+
+
+exports.input = function input (track, fps) {
+  const rs = new Readable({
+    read(){}
+  })
+
   const input = StreamInput(rs)
   input.kind = track.kind
 
   if (track.kind === 'video') {
-    const sink = new w2f.wrtc.nonstandard.RTCVideoSink(track)
+    const sink = new RTCVideoSink(track)
 
-    sink.onframe = ({ frame }) => {
-      rs.push(Buffer.from(frame.data))
-      input.options = getOptions(track.kind, frame.width, frame.height)
-      input.width = frame.width
-      input.height = frame.height
+    sink.onframe = ({ frame: {data, height, width} }) => {
+      rs.push(Buffer.from(data))
+
+      input.options = getOptions(track.kind, width, height, fps)
+      input.height  = height
+      input.width   = width
+
       rs.emit('options')
     }
   } else if (track.kind === 'audio') {
-    const sink = new w2f.wrtc.nonstandard.RTCAudioSink(track)
-    sink.ondata = (event) => {
-      rs.push(Buffer.from(event.samples.buffer))
-    }
+    const sink = new RTCAudioSink(track)
+
+    sink.ondata = (event) => rs.push(Buffer.from(event.samples.buffer))
+
     input.options = getOptions(track.kind)
   }
 
-  return new Promise((resolve) => {
-    if (input.options) {
-      resolve(input)
-    } else {
-      rs.once('options', () => {
-        resolve(input)
-      })
-    }
-  })
+  if (input.options) return Promise.resolve(input)
+
+  return new Promise(resolve => rs.once('options', () => resolve(input)))
 }
 
-w2f.output = function output ({ kind, width, height, sampleRate }) {
+exports.output = function output ({ kind, width, height, sampleRate }, fps) {
   var ws = null
   var source = null
 
   if (kind === 'video') {
     ws = chunker(width * height * 1.5)
-    source = new w2f.wrtc.nonstandard.RTCVideoSource()
+    source = new RTCVideoSource()
 
     ws.on('data', (chunk) => {
       source.onFrame({
@@ -57,11 +59,13 @@ w2f.output = function output ({ kind, width, height, sampleRate }) {
     })
   } else if (kind === 'audio') {
     ws = chunker(2 * sampleRate / 100)
-    source = new w2f.wrtc.nonstandard.RTCAudioSource()
+    source = new RTCAudioSource()
 
     ws.on('data', (chunk) => {
+      chunk = chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.length)
+
       source.onData({
-        samples: new Int16Array(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.length)),
+        samples: new Int16Array(chunk),
         sampleRate
       })
     })
@@ -69,24 +73,22 @@ w2f.output = function output ({ kind, width, height, sampleRate }) {
 
   const output = StreamOutput(ws)
   output.track = source.createTrack()
-  output.options = getOptions(kind, width, height)
+  output.options = getOptions(kind, width, height, fps)
   output.kind = kind
   output.width = width
   output.height = height
 
-  return new Promise((resolve) => {
-    resolve(output)
-  })
+  return Promise.resolve(output)
 }
 
-function getOptions (kind, width, height) {
+function getOptions (kind, width, height, fps=30) {
   if (kind === 'video') {
     return [
       '-f rawvideo',
       '-c:v rawvideo',
       '-s ' + width + 'x' + height, // TODO
       '-pix_fmt yuv420p',
-      '-r 30'
+      `-r ${fps}`
     ]
   } else if (kind === 'audio') {
     return [
@@ -95,9 +97,4 @@ function getOptions (kind, width, height) {
       '-ac 1'
     ]
   }
-}
-
-module.exports = (wrtc) => {
-  w2f.wrtc = wrtc
-  return w2f
 }

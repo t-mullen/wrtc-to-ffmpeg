@@ -6,12 +6,12 @@
 
 Pipe MediaStreamTracks between [wrtc](https://github.com/node-webrtc/node-webrtc) and [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg). Early development, plenty of issues. Currently only for Unix and Linux.
 
-Allows you to record WebRTC streams, stream media files over WebRTC connections, or route WebRTC streams to RTSP/RTMP/etc. 
+Allows you to record WebRTC streams, stream media files over WebRTC connections, or route WebRTC streams to RTSP/RTMP/etc.
 
 ```javascript
 const ffmpeg = require('fluent-ffmpeg')
 const wrtc = require('wrtc')
-const w2f = require('wrtc-to-ffmpeg')(wrtc)
+const w2f = require('wrtc-to-ffmpeg')
 
 const input = await w2f.input(track) // audio or video MediaStreamTrack
 
@@ -27,11 +27,11 @@ You can also pipe FFMPEG output to `MediaStreamTracks`.
 const videoOutput = await w2f.output({ kind: 'video', width: 480, height: 360 })
 const audioOutput = await w2f.output({ kind: 'audio', sampleRate: 48000 })
 ffmpeg()
-  .input('./myVideo.mp4')  
-  .output(videoOutput.url)  					
-  .outputOptions(videoOutput.options) 
-  .output(audioOutput.url)  					
-  .outputOptions(audioOutput.options) 
+  .input('./myVideo.mp4')
+  .output(videoOutput.url)
+  .outputOptions(videoOutput.options)
+  .output(audioOutput.url)
+  .outputOptions(audioOutput.options)
 
 videoOutput.track // do what you want with the new MediaStreamTracks
 audioOutput.track
@@ -53,6 +53,5 @@ Creates an output object with the specified properties.
 `output.track` is a `MediaStreamTrack`.
 
 `output.url` is a Unix domain socket path that FFMPEG can use as output.
- 
-`output.options` is an object with the minimum FFMPEG options.
 
+`output.options` is an object with the minimum FFMPEG options.

@@ -14,13 +14,24 @@
   "devDependencies": {
     "fluent-ffmpeg": "^2.1.2",
     "getusermedia": "^2.0.1",
-    "simple-peer": "^9.3.0",
-    "standard": "^8.6.0",
-    "tape": "^4.6.3",
-    "wrtc": "^0.3.6"
+    "simple-peer": "^9.9.3",
+    "standard": "^16.0.3",
+    "tape": "^5.1.1",
+    "wrtc": "^0.4.7"
   },
   "dependencies": {
     "fluent-ffmpeg-multistream": "^1.0.0",
     "stream-chunker": "^1.2.8"
-  }
+  },
+  "peerDependencies": {
+    "wrtc": "^0.4.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t-mullen/wrtc-to-ffmpeg.git"
+  },
+  "bugs": {
+    "url": "https://github.com/t-mullen/wrtc-to-ffmpeg/issues"
+  },
+  "homepage": "https://github.com/t-mullen/wrtc-to-ffmpeg#readme"
 }
